@@ -1,0 +1,55 @@
+services:
+  app:
+    build: .
+    container_name: restaurante_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE_URL=mysql+pymysql://user:user_password@db:3306/restaurante
+      - MONGO_URL=mongodb://mongo_root:mongo_password@mongodb:27017/
+    depends_on:
+      - db
+      - mongodb
+    networks:
+      - restaurante_net
+
+  db:
+    image: mysql:8.0
+    container_name: restaurante_mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: restaurante
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - restaurante_net
+
+  mongodb:
+    image: mongo:6.0
+    container_name: restaurante_mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo_root
+      MONGO_INITDB_ROOT_PASSWORD: mongo_password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - restaurante_net
+
+networks:
+  restaurante_net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  mongo_data:

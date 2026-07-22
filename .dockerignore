@@ -1,0 +1,23 @@
+# Ignorar ambientes virtuais locais
+.venv/
+venv/
+ENV/
+env/
+
+# Ignorar caches de execução e teste
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Ignorar pastas de configuração da IDE
+.vscode/
+.idea/
+
+# Ignorar logs e arquivos locais temporários
+*.log
+.env

@@ -1,0 +1,29 @@
+Sistema de Restaurante (Self-Service a Kg) - Plano de Desenvolvimento;;;;;;;;
+;;;;;;;;
+Fase;Nº;Tarefa;Descrição;Prioridade;Status;Resposta;Responsável;Verificador
+Fase 0 - Planejamento e Infraestrutura;1;Definir arquitetura do sistema;Escolher linguagem, banco de dados e se será web ou desktop;Alta;A fazer;Python, MySQL e Mongu, WEB;Ambos;
+Fase 0 - Planejamento e Infraestrutura;2;Modelar banco de dados;Estruturar tabelas de produtos, comandas, clientes, pagamentos e acessos;Alta;A fazer;;Leonardo;Hamilton
+Fase 0 - Planejamento e Infraestrutura;3;Configurar ambiente de desenvolvimento;Instalar ferramentas, versionamento e ambiente de testes;Alta;A fazer;;Leonardo;Hamilton
+Fase 1 - Recebimento (Comandas/Pedidos);4;Cadastro de produtos e preço por kg;Tela para cadastrar itens do buffet e preço por quilo;Alta;A fazer;;Leonardo;Hamilton
+Fase 1 - Recebimento (Comandas/Pedidos);5;Abertura de comanda;Vincular comanda/cartão do cliente ao iniciar atendimento;Alta;A fazer;;Leonardo;Hamilton
+Fase 1 - Recebimento (Comandas/Pedidos);6;Registro de pedidos;Lançar itens consumidos na comanda;Alta;A fazer;;Leonardo;Hamilton
+Fase 1 - Recebimento (Comandas/Pedidos);7;Fechamento de comanda;Consolidar valores da comanda para pagamento;Alta;A fazer;;Leonardo;Hamilton
+Fase 2 - Integração com Balança;8;Escolher protocolo da balança;Verificar modelo (serial/USB/rede) e protocolo de comunicação;Alta;A fazer;;Hamilton;Leonardo
+Fase 2 - Integração com Balança;9;Implementar leitura de peso;Capturar peso em tempo real da balança;Alta;A fazer;;Hamilton;Leonardo
+Fase 2 - Integração com Balança;10;Calcular valor pelo peso;Multiplicar peso lido pelo preço/kg cadastrado;Alta;A fazer;;Hamilton;Leonardo
+Fase 2 - Integração com Balança;11;Testar com balança física;Validar leituras e calibração em ambiente real;Média;A fazer;;Hamilton;Leonardo
+Fase 3 - Pagamento;12;Suportar múltiplas formas de pagamento;Dinheiro, cartão débito/crédito e PIX;Alta;A fazer;;;
+Fase 3 - Pagamento;13;Integrar maquininha (TEF/POS);Comunicação com operadora de cartão;Alta;A fazer;;;
+Fase 3 - Pagamento;14;Calcular troco;Automatizar cálculo de troco em pagamentos em dinheiro;Média;A fazer;;;
+Fase 3 - Pagamento;15;Registrar pagamento no banco;Persistir transação vinculada à comanda;Alta;A fazer;;;
+Fase 4 - Cupom Fiscal;16;Verificar exigência fiscal;Checar modelo exigido (NFC-e, SAT, ECF) conforme o estado;Alta;A fazer;;;
+Fase 4 - Cupom Fiscal;17;Integrar emissor fiscal;Conectar à SEFAZ ou serviço terceirizado de emissão;Alta;A fazer;;;
+Fase 4 - Cupom Fiscal;18;Imprimir cupom;Configurar impressora térmica para emissão;Alta;A fazer;;;
+Fase 4 - Cupom Fiscal;19;Implementar contingência;Modo offline para emissão quando SEFAZ estiver indisponível;Média;A fazer;;;
+Fase 5 - Controle de Acesso (Catracas Henry);20;Estudar protocolo Henry;Levantar documentação do SDK/protocolo (ex: Henry 4500);Alta;A fazer;;;
+Fase 5 - Controle de Acesso (Catracas Henry);21;Implementar comunicação com catraca;Enviar/receber comandos via TCP/IP com a catraca;Alta;A fazer;;;
+Fase 5 - Controle de Acesso (Catracas Henry);22;Vincular cartão à comanda;Associar cartão do cliente à abertura de comanda;Alta;A fazer;;;
+Fase 5 - Controle de Acesso (Catracas Henry);23;Liberar/bloquear acesso;Autorizar entrada/saída conforme status da comanda;Alta;A fazer;;;
+Fase 6 - Testes e Implantação;24;Testes integrados;Validar fluxo completo: entrada -> pedido -> balança -> pagamento -> cupom -> saída;Alta;A fazer;;;
+Fase 6 - Testes e Implantação;25;Treinamento da equipe;Capacitar operadores no uso do sistema;Média;A fazer;;;
+Fase 6 - Testes e Implantação;26;Implantação piloto;Rodar em ambiente real com acompanhamento;Alta;A fazer;;;
