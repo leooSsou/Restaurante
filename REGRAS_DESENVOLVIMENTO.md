@@ -80,9 +80,21 @@ Como balanças e catracas dependem de conexão física, **é obrigatório** segu
 ---
 
 ## 6. Fluxo de Git e Commits
-* Commits devem ser claros e seguir o padrão de **Conventional Commits**:
-  * `feat: ...` para novos recursos.
-  * `fix: ...` para correção de bugs.
-  * `test: ...` para escrita de testes.
-  * `docs: ...` para documentações.
-  * `refactor: ...` para melhorias no código sem alteração de comportamento.
+* **Ramos Principais (Branches)**:
+  * `main`: Contém apenas código estável em produção.
+  * `develop`: Ramo principal de integração de desenvolvimento. É a branch base para novas features.
+* **Desenvolvimento de Funcionalidades**:
+  * Toda nova feature ou correção deve ser feita em um ramo específico (ex: `feat/cadastro-produtos` ou `fix/leitura-peso`).
+  * **Nunca** desenvolva ou commite diretamente na `main` ou na `develop`.
+  * **Fluxo de Integração**:
+    1. Crie o ramo a partir da `develop` (`git checkout -b feat/minha-feature develop`).
+    2. Implemente e teste a funcionalidade.
+    3. Submeta um Pull Request / realize o merge para a branch `develop`.
+    4. Após consolidação e testes integrados na `develop`, o código é promovido para a `main`.
+* **Padrão de Commits**:
+  * Commits devem seguir o padrão de **Conventional Commits**:
+    * `feat: ...` para novos recursos.
+    * `fix: ...` para correção de bugs.
+    * `test: ...` para escrita de testes.
+    * `docs: ...` para documentações.
+    * `refactor: ...` para melhorias no código sem alteração de comportamento.
