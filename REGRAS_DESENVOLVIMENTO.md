@@ -91,6 +91,8 @@ Como balanças e catracas dependem de conexão física, **é obrigatório** segu
     2. Implemente e teste a funcionalidade.
     3. Submeta um Pull Request / realize o merge para a branch `develop`.
     4. Após consolidação e testes integrados na `develop`, o código é promovido para a `main`.
+* **Aprovação de Commits**:
+  * O assistente de IA **nunca** deve realizar commits (`git commit`) ou envios (`git push`) de forma autônoma sem a autorização e aprovação explícita prévia do desenvolvedor no chat.
 * **Padrão de Commits**:
   * Commits devem seguir o padrão de **Conventional Commits**:
     * `feat: ...` para novos recursos.
