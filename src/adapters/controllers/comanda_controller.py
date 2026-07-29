@@ -6,16 +6,22 @@ from src.infrastructure.database.connection import obter_sessao_mysql
 from src.adapters.repositories.mysql_comanda_repository import MySQLComandaRepository
 from src.adapters.repositories.mysql_produto_repository import MySQLProdutoRepository
 from src.adapters.repositories.mysql_item_comanda_repository import MySQLItemComandaRepository
+from src.adapters.repositories.mysql_pagamento_repository import MySQLPagamentoRepository
 
 from src.use_cases.abrir_comanda import AbrirComandaUseCase, AbrirComandaInput
 from src.use_cases.lancar_item_comanda import LancarItemComandaUseCase, LancarItemComandaInput
 from src.use_cases.fechar_comanda import FecharComandaUseCase, FecharComandaInput
+from src.use_cases.registrar_pagamento import RegistrarPagamentoUseCase, RegistrarPagamentoInput
 
 router = APIRouter(prefix="/comandas", tags=["Comandas"])
 
 class RegistrarItemRequest(BaseModel):
     produto_id: int = Field(..., description="ID único do produto")
     quantidade: float = Field(..., description="Quantidade (peso em kg ou unidades)")
+
+class RegistrarPagamentoRequest(BaseModel):
+    valor: float = Field(..., description="Valor pago")
+    metodo_pagamento: str = Field(..., description="Método de pagamento (dinheiro, debito, credito, pix)")
 
 @router.post("/", response_model=None, status_code=status.HTTP_201_CREATED)
 def abrir_comanda(dados: AbrirComandaInput, db: Session = Depends(obter_sessao_mysql)):
@@ -90,6 +96,36 @@ def lancar_item_comanda(comanda_id: str, dados: RegistrarItemRequest, db: Sessio
                 "preco_unitario": item_lancado.preco_unitario,
                 "preco_total": item_lancado.preco_total,
                 "criado_em": item_lancado.criado_em.isoformat() if item_lancado.criado_em else None
+            }
+        }
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+@router.post("/{comanda_id}/pagamentos", response_model=None, status_code=status.HTTP_201_CREATED)
+def registrar_pagamento(comanda_id: str, dados: RegistrarPagamentoRequest, db: Session = Depends(obter_sessao_mysql)):
+    """Registra um pagamento na comanda ativa."""
+    comanda_repo = MySQLComandaRepository(db)
+    pagamento_repo = MySQLPagamentoRepository(db)
+    
+    use_case = RegistrarPagamentoUseCase(comanda_repo, pagamento_repo)
+    try:
+        input_dto = RegistrarPagamentoInput(
+            comanda_id=comanda_id,
+            valor=dados.valor,
+            metodo_pagamento=dados.metodo_pagamento
+        )
+        pagamento = use_case.executar(input_dto)
+        return {
+            "mensagem": "Pagamento registrado com sucesso!",
+            "pagamento": {
+                "id": pagamento.id,
+                "comanda_id": pagamento.comanda_id,
+                "valor": pagamento.valor,
+                "metodo_pagamento": pagamento.metodo_pagamento,
+                "criado_em": pagamento.criado_em.isoformat() if pagamento.criado_em else None
             }
         }
     except ValueError as e:
