@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Configurações e Estado Global da Tela
     let produtosCarregados = [];
     let comandaAtivaCarregada = null;
+    let comandasValidadas = [];
 
     // --- Relógio no Header ---
     function atualizarRelogio() {
@@ -220,29 +221,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 5. Listagem de Comandas Ativas
+    // 5. Listagem de Comandas Ativas (Grade e Tabela com filtros)
     async function carregarListaComandas() {
         try {
-            // Nota: Como não temos um endpoint para listar comandas completas ativas diretamente no controller anterior,
-            // faremos um truque limpo: Vamos carregar as comandas mais recentes buscando no banco.
-            // Para isso funcionar de forma dinâmica no frontend, criaremos e consumiremos uma lista simulada baseada
-            // nas últimas comandas ativas carregadas ou mapearemos.
-            // Para ficar profissional, vamos buscar comandas ativas salvando os números abertos localmente ou consultando.
-            // Na verdade, podemos consultar do nosso banco usando uma rota adicional do FastAPI.
-            // Para garantir o funcionamento, vamos carregar uma lista mockada se der 404, ou buscar comandas se adicionarmos a rota.
-            // Vamos adicionar a rota GET `/comandas` no controller mais tarde para listar todas.
-            // Por enquanto, faremos o frontend seguro:
             const res = await fetch("/comandas/ativas/0001").catch(() => null); // Teste de conexão
             
-            const tbody = document.getElementById("lista-comandas-body");
-            tbody.innerHTML = "";
-            
             // Para que o usuário veja as comandas no salão, vamos guardar as comandas ativas que abrimos nesta sessão
-            // em um array no localStorage! Isso garante que a lista funcione mesmo sem a API de listagem geral implementada.
+            // em um array no localStorage!
             let comandasLocais = JSON.parse(localStorage.getItem("comandas_ativas") || "[]");
             
             // Limpa comandas antigas e atualiza status
-            let comandasValidadas = [];
+            comandasValidadas = [];
             let ativasCount = 0;
             let pendentesCount = 0;
 
@@ -268,32 +257,113 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("stat-comandas-ativas").textContent = ativasCount;
             document.getElementById("stat-comandas-pendentes").textContent = pendentesCount;
 
-            if (comandasValidadas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--color-text-muted);">Nenhuma comanda ativa no salão</td></tr>`;
-                return;
-            }
-
-            comandasValidadas.forEach(c => {
-                const tr = document.createElement("tr");
-                const entrada = new Date(c.criado_em).toLocaleTimeString("pt-BR");
-                
-                tr.innerHTML = `
-                    <td><strong>#${c.numero_cartao}</strong></td>
-                    <td>${entrada}</td>
-                    <td>R$ ${c.valor_total.toFixed(2)}</td>
-                    <td class="text-green">R$ ${c.total_pago.toFixed(2)}</td>
-                    <td class="${c.saldo_devedor > 0 ? 'text-red' : 'text-green'}"><strong>R$ ${c.saldo_devedor.toFixed(2)}</strong></td>
-                    <td>
-                        <button class="btn btn-secondary btn-sm" onclick="carregarComandaNoCaixa('${c.numero_cartao}')">
-                            <i class="fa-solid fa-cash-register"></i> Atender
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+            renderizarComandas(comandasValidadas);
         } catch (err) {
             console.error("Erro ao carregar comandas:", err);
         }
+    }
+
+    // Renderiza comandas tanto na grade de cartões quanto na tabela
+    function renderizarComandas(lista) {
+        const tbody = document.getElementById("lista-comandas-body");
+        const grid = document.getElementById("comandas-grid-container");
+        
+        tbody.innerHTML = "";
+        grid.innerHTML = "";
+
+        if (lista.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--color-text-muted);">Nenhuma comanda ativa encontrada</td></tr>`;
+            grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--color-text-muted); font-weight: 500;"><i class="fa-regular fa-folder-open" style="font-size: 24px; display: block; margin-bottom: 8px;"></i> Nenhuma comanda ativa no salão</div>`;
+            return;
+        }
+
+        lista.forEach(c => {
+            const entrada = new Date(c.criado_em).toLocaleTimeString("pt-BR");
+            const saldoClass = c.saldo_devedor > 0 ? "text-red" : "text-green paid-off";
+
+            // A. Renderizar na Tabela
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><strong>#${c.numero_cartao}</strong></td>
+                <td>${entrada}</td>
+                <td>R$ ${c.valor_total.toFixed(2)}</td>
+                <td class="text-green">R$ ${c.total_pago.toFixed(2)}</td>
+                <td class="${c.saldo_devedor > 0 ? 'text-red' : 'text-green'}"><strong>R$ ${c.saldo_devedor.toFixed(2)}</strong></td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" onclick="carregarComandaNoCaixa('${c.numero_cartao}')">
+                        <i class="fa-solid fa-cash-register"></i> Atender
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+
+            // B. Renderizar na Grade de Cartões
+            const card = document.createElement("div");
+            card.className = "comanda-card-item";
+            card.innerHTML = `
+                <div class="comanda-card-header">
+                    <div class="comanda-card-id">
+                        <span class="card-num">#${c.numero_cartao}</span>
+                        <span class="card-time"><i class="fa-regular fa-clock"></i> Entrada: ${entrada}</span>
+                    </div>
+                    <span class="badge-status open">Consumindo</span>
+                </div>
+                <div class="comanda-card-body">
+                    <div class="comanda-card-row">
+                        <span>Consumido</span>
+                        <span class="val">R$ ${c.valor_total.toFixed(2)}</span>
+                    </div>
+                    <div class="comanda-card-row">
+                        <span>Pago</span>
+                        <span class="val text-green">R$ ${c.total_pago.toFixed(2)}</span>
+                    </div>
+                    <div class="comanda-card-row outstanding-row">
+                        <span>Saldo Restante</span>
+                        <span class="val ${saldoClass}">R$ ${c.saldo_devedor.toFixed(2)}</span>
+                    </div>
+                </div>
+                <div class="comanda-card-footer">
+                    <button class="btn btn-primary btn-block" onclick="carregarComandaNoCaixa('${c.numero_cartao}')">
+                        <i class="fa-solid fa-cash-register"></i> Atender Caixa
+                    </button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // Filtro de Busca Instantâneo
+    const comandaSearchInput = document.getElementById("comanda-search-input");
+    if (comandaSearchInput) {
+        comandaSearchInput.addEventListener("input", () => {
+            const query = comandaSearchInput.value.trim().toLowerCase();
+            const filtradas = comandasValidadas.filter(c => 
+                c.numero_cartao.toLowerCase().includes(query)
+            );
+            renderizarComandas(filtradas);
+        });
+    }
+
+    // Alternância de Visualização (Grade vs Tabela)
+    const btnViewCards = document.getElementById("btn-view-cards");
+    const btnViewTable = document.getElementById("btn-view-table");
+    const gridContainer = document.getElementById("comandas-grid-container");
+    const tableContainer = document.getElementById("comandas-table-container");
+
+    if (btnViewCards && btnViewTable) {
+        btnViewCards.addEventListener("click", () => {
+            btnViewCards.classList.add("active");
+            btnViewTable.classList.remove("active");
+            gridContainer.classList.remove("d-none");
+            tableContainer.classList.add("d-none");
+        });
+
+        btnViewTable.addEventListener("click", () => {
+            btnViewCards.classList.remove("active");
+            btnViewTable.classList.add("active");
+            gridContainer.classList.add("d-none");
+            tableContainer.classList.remove("d-none");
+        });
     }
 
     // Salvar comanda aberta localmente no localStorage para controle do salão

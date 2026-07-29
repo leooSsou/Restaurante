@@ -11,7 +11,7 @@
     <!-- FontAwesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Estilo Principal -->
-    <link rel="stylesheet" href="/static/css/style.css?v=1.3">
+    <link rel="stylesheet" href="/static/css/style.css?v=1.4">
 </head>
 <body>
     <div class="app-container">
@@ -232,10 +232,32 @@
 
                 <!-- ABA 3: Comandas Ativas -->
                 <section class="tab-section" id="tab-comandas">
-                    <div class="content-card">
+                    <!-- Barra de Ferramentas com Filtro e Alternância de Visualização -->
+                    <div class="comandas-toolbar">
+                        <div class="toolbar-search">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" id="comanda-search-input" placeholder="Filtrar por número de cartão..." autocomplete="off">
+                        </div>
+                        <div class="view-toggle-buttons">
+                            <button class="btn-toggle active" id="btn-view-cards" title="Visualização em Grade de Cartões">
+                                <i class="fa-solid fa-grip"></i> Grade
+                            </button>
+                            <button class="btn-toggle" id="btn-view-table" title="Visualização em Tabela Detalhada">
+                                <i class="fa-solid fa-table-list"></i> Tabela
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Grade Visual de Cartões (Visualização Padrão) -->
+                    <div class="comandas-grid" id="comandas-grid-container">
+                        <!-- Populado dinamicamente via JS -->
+                    </div>
+
+                    <!-- Tabela Clássica Detalhada (Opcional/Alternável) -->
+                    <div class="content-card d-none" id="comandas-table-container">
                         <div class="card-header">
-                            <h3><i class="fa-solid fa-clipboard-list"></i> Controle de Comandas no Salão</h3>
-                            <p>Lista de cartões em consumo ativo</p>
+                            <h3><i class="fa-solid fa-clipboard-list"></i> Tabela de Acompanhamento</h3>
+                            <p>Lista detalhada de comandas ativas no salão</p>
                         </div>
                         <div class="table-wrapper">
                             <table class="app-table">
@@ -362,6 +384,6 @@
             </div>
         </main>
     </div>
-    <script src="/static/js/app.js?v=1.2"></script>
+    <script src="/static/js/app.js?v=1.4"></script>
 </body>
 </html>
