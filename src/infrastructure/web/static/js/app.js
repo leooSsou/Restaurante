@@ -43,6 +43,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 4000);
     }
 
+    async function parseResponse(res) {
+        const text = await res.text();
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            throw new Error(`Erro no servidor (${res.status}): ${text.substring(0, 100)}`);
+        }
+    }
+
     // --- Relógio no Header ---
     function atualizarRelogio() {
         const agora = new Date();
@@ -203,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify(payload)
             });
 
-            const data = await res.json();
+            const data = await parseResponse(res);
             if (res.ok) {
                 msgProduto.textContent = "Produto cadastrado com sucesso!";
                 msgProduto.classList.add("success");
@@ -239,7 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ numero_cartao: numeroCartao })
             });
 
-            const data = await res.json();
+            const data = await parseResponse(res);
             if (res.ok) {
                 msgAbertura.textContent = `Comanda #${numeroCartao} aberta com sucesso!`;
                 msgAbertura.classList.add("success");
@@ -486,7 +495,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function resAtivaComanda(numeroCartao) {
         const res = await fetch(`/comandas/ativas/${numeroCartao}`);
         if (!res.ok) throw new Error("Erro ao carregar dados da comanda");
-        return await res.json();
+        return await parseResponse(res);
     }
 
     function exibirDetalhesComanda(c) {
@@ -646,7 +655,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify(payload)
             });
 
-            const data = await res.json();
+            const data = await parseResponse(res);
             if (res.ok) {
                 msgLancamento.textContent = "Item lançado com sucesso!";
                 msgLancamento.classList.add("success");
@@ -730,7 +739,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
             });
 
-            const data = await res.json();
+            const data = await parseResponse(res);
             if (res.ok) {
                 mostrarNotificacao(`Recebimento de R$ ${valor.toFixed(2)} registrado com sucesso (${metodo.toUpperCase()})!`, "success");
                 // Recarrega dados financeiros e atualiza painéis
@@ -752,7 +761,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 method: "POST"
             });
 
-            const data = await res.json();
+            const data = await parseResponse(res);
             if (res.ok) {
                 mostrarNotificacao("Comanda fechada com sucesso! Catraca de saída liberada.", "success");
                 
@@ -799,7 +808,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ numero_cartao: num })
             });
 
-            const data = await res.json();
+            const data = await parseResponse(res);
             
             simDisplay.className = "catraca-display"; // Reseta classes
             if (res.ok) {
@@ -837,7 +846,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 simDisplay.classList.add("success");
                 simTexto.innerHTML = `ACESSO LIBERADO<br><small>Cartão #${num} fora de uso</small>`;
             } else if (res.ok) {
-                const c = await res.json();
+                const c = await parseResponse(res);
                 if (c.saldo_devedor > 0) {
                     simDisplay.classList.add("error");
                     simTexto.innerHTML = `ACESSO NEGADO<br><small>Saldo Pendente: R$ ${c.saldo_devedor.toFixed(2)}</small>`;

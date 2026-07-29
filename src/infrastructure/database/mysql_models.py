@@ -29,7 +29,7 @@ class ComandaModel(Base):
     __tablename__ = "comandas"
 
     id = Column(String(36), primary_key=True)  # UUID
-    numero_cartao = Column(String(50), nullable=False, unique=True, index=True)
+    numero_cartao = Column(String(50), nullable=False, index=True)
     esta_aberta = Column(Boolean, default=True, nullable=False)
     criado_em = Column(DateTime, default=datetime.utcnow, nullable=False)
     fechado_em = Column(DateTime, nullable=True)
