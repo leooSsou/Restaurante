@@ -1032,4 +1032,113 @@ button:disabled, .btn:disabled {
     color: var(--color-primary);
 }
 
+/* ==========================================================================
+   NOTIFICAÇÕES TOAST FLUTUANTES (INOVADOR E PREMIUM)
+   ========================================================================== */
+
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+.toast-notification {
+    pointer-events: auto;
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--border-radius-md);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 320px;
+    max-width: 450px;
+    position: relative;
+    overflow: hidden;
+    animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: var(--transition-normal);
+}
+
+/* Faixa lateral esquerda colorida */
+.toast-notification::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+}
+
+.toast-notification.success::before {
+    background-color: var(--color-success);
+}
+
+.toast-notification.error::before {
+    background-color: var(--color-danger);
+}
+
+.toast-notification i {
+    font-size: 18px;
+}
+
+.toast-content {
+    flex: 1;
+}
+
+.toast-message {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1.4;
+}
+
+.toast-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    font-weight: 300;
+}
+
+.toast-close-btn:hover {
+    color: var(--color-text-primary);
+}
+
+.toast-notification.fade-out {
+    animation: toastFadeOut 0.3s ease forwards;
+}
+
+/* Animações de Entrada e Saída */
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(40px) translateY(0);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) translateY(0);
+    }
+}
+
+@keyframes toastFadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+
 

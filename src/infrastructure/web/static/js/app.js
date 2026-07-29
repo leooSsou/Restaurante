@@ -9,6 +9,40 @@ document.addEventListener("DOMContentLoaded", () => {
     let comandasValidadas = [];
     let metodoPagamentoSelecionado = "pix";
 
+    // --- Notificações Toast Premium ---
+    function mostrarNotificacao(mensagem, tipo = 'success') {
+        const container = document.getElementById("toast-container");
+        if (!container) return;
+        
+        const toast = document.createElement("div");
+        toast.className = `toast-notification ${tipo}`;
+        
+        const icon = tipo === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+        const iconColor = tipo === 'success' ? 'text-green' : 'text-red';
+        
+        toast.innerHTML = `
+            <i class="fa-solid ${icon} ${iconColor}"></i>
+            <div class="toast-content">
+                <span class="toast-message">${mensagem}</span>
+            </div>
+            <button class="toast-close-btn">&times;</button>
+        `;
+        
+        container.appendChild(toast);
+        
+        toast.querySelector(".toast-close-btn").addEventListener("click", () => {
+            toast.classList.add("fade-out");
+            setTimeout(() => toast.remove(), 300);
+        });
+        
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.classList.add("fade-out");
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 4000);
+    }
+
     // --- Relógio no Header ---
     function atualizarRelogio() {
         const agora = new Date();
@@ -433,7 +467,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error("Comanda ativa não encontrada para este cartão");
             }
         } catch (err) {
-            alert(err.message);
+            mostrarNotificacao(err.message, "error");
             comandaDetalhesContainer.classList.add("d-none");
             comandaAtivaCarregada = null;
             atualizarEstadoPainelLancamento();
@@ -653,7 +687,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!comandaAtivaCarregada) return;
             const valor = parseFloat(document.getElementById("pagamento-valor").value) || 0;
             if (valor <= 0) {
-                alert("Por favor, digite um valor de pagamento maior que zero.");
+                mostrarNotificacao("Por favor, digite um valor de pagamento maior que zero.", "error");
                 return;
             }
             await registrarPagamentoCompleto(comandaAtivaCarregada.id, valor, metodoPagamentoSelecionado);
@@ -667,7 +701,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!comandaAtivaCarregada) return;
 
             if (comandaAtivaCarregada.saldo_devedor > 0) {
-                alert("Não é possível fechar comanda com saldo pendente!");
+                mostrarNotificacao("Não é possível fechar comanda com saldo pendente!", "error");
                 return;
             }
 
@@ -689,7 +723,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const data = await res.json();
             if (res.ok) {
-                alert(`Recebimento de R$ ${valor.toFixed(2)} registrado com sucesso (${metodo.toUpperCase()})!`);
+                mostrarNotificacao(`Recebimento de R$ ${valor.toFixed(2)} registrado com sucesso (${metodo.toUpperCase()})!`, "success");
                 // Recarrega dados financeiros e atualiza painéis
                 const resAtualizado = await resAtivaComanda(comandaAtivaCarregada.numero_cartao);
                 comandaAtivaCarregada = resAtualizado;
@@ -699,7 +733,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(data.detail || "Erro ao registrar pagamento.");
             }
         } catch (err) {
-            alert(err.message);
+            mostrarNotificacao(err.message, "error");
         }
     }
 
@@ -711,7 +745,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const data = await res.json();
             if (res.ok) {
-                alert("Comanda fechada com sucesso! Catraca de saída liberada.");
+                mostrarNotificacao("Comanda fechada com sucesso! Catraca de saída liberada.", "success");
                 
                 // Atualiza localStorage limpando a comanda local ativa
                 let comandasLocais = JSON.parse(localStorage.getItem("comandas_ativas") || "[]");
@@ -727,7 +761,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(data.detail || "Erro ao fechar comanda.");
             }
         } catch (err) {
-            alert(err.message);
+            mostrarNotificacao(err.message, "error");
         }
     }
 
