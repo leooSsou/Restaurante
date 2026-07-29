@@ -659,26 +659,25 @@ button:disabled, .btn:disabled {
 .fin-box {
     background-color: var(--color-bg-base);
     border: 1px solid var(--color-border);
-    padding: 10px;
+    padding: 12px 10px;
     border-radius: var(--border-radius-sm);
     text-align: center;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-fast);
 }
 
-.fin-box span {
-    font-size: 10px;
-    color: var(--color-text-secondary);
-    display: block;
-    margin-bottom: 2px;
-    font-weight: 600;
+.fin-box.box-pago {
+    background-color: var(--color-success-light);
+    border-color: hsla(142, 65%, 35%, 0.15);
 }
 
-.fin-box h5 {
-    font-size: 14px;
-    font-weight: 700;
+.fin-box.box-devedor {
+    background-color: var(--color-danger-light);
+    border-color: hsla(350, 75%, 45%, 0.15);
 }
 
-.text-green { color: var(--color-success); }
-.text-red { color: var(--color-danger); }
+.text-green { color: var(--color-success) !important; }
+.text-red { color: var(--color-danger) !important; }
 
 .itens-comanda-list-box {
     margin-bottom: 20px;
@@ -985,4 +984,52 @@ button:disabled, .btn:disabled {
     font-size: 12px;
     padding: 8px 12px;
 }
+
+/* Seção de Recebimento de Caixa */
+.caixa-pagamento-secao {
+    margin-top: 24px;
+    padding-top: 16px;
+    animation: fadeIn var(--transition-normal);
+}
+
+.pagamento-form-grid {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 20px;
+    margin-top: 14px;
+}
+
+.pagamento-metodos-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.btn-metodo {
+    background-color: var(--color-bg-base);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 10px;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-metodo:hover {
+    border-color: var(--color-border-hover);
+    color: var(--color-text-primary);
+}
+
+.btn-metodo.active {
+    background-color: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
 

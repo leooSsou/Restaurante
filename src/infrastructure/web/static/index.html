@@ -11,7 +11,7 @@
     <!-- FontAwesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Estilo Principal -->
-    <link rel="stylesheet" href="/static/css/style.css?v=1.4">
+    <link rel="stylesheet" href="/static/css/style.css?v=1.5">
 </head>
 <body>
     <div class="app-container">
@@ -309,11 +309,11 @@
                                         <span>Consumido</span>
                                         <h5 id="detalhe-valor-total">R$ 0,00</h5>
                                     </div>
-                                    <div class="fin-box text-green">
+                                    <div class="fin-box text-green box-pago">
                                         <span>Pago</span>
                                         <h5 id="detalhe-total-pago">R$ 0,00</h5>
                                     </div>
-                                    <div class="fin-box text-red">
+                                    <div class="fin-box text-red box-devedor">
                                         <span>Restante</span>
                                         <h5 id="detalhe-saldo-devedor">R$ 0,00</h5>
                                     </div>
@@ -326,8 +326,41 @@
                                     </ul>
                                 </div>
 
-                                <div class="comanda-actions-row">
-                                    <button class="btn-danger btn-block" id="btn-solicitar-fechamento">Fechar Comanda (Saída)</button>
+                                <!-- Seção de Recebimento de Caixa (Tarefa 7) -->
+                                <div id="caixa-pagamento-secao" class="caixa-pagamento-secao d-none">
+                                    <div class="form-divider">Efetuar Recebimento (Caixa)</div>
+                                    <div class="pagamento-form-grid">
+                                        <div class="form-group">
+                                            <label for="pagamento-valor">Valor a Pagar (R$)</label>
+                                            <input type="number" step="0.01" id="pagamento-valor" placeholder="0.00">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Forma de Pagamento</label>
+                                            <div class="pagamento-metodos-grid">
+                                                <button type="button" class="btn-metodo active" data-metodo="pix">
+                                                    <i class="fa-solid fa-qrcode"></i> PIX
+                                                </button>
+                                                <button type="button" class="btn-metodo" data-metodo="dinheiro">
+                                                    <i class="fa-solid fa-money-bill-wave"></i> Dinheiro
+                                                </button>
+                                                <button type="button" class="btn-metodo" data-metodo="debito">
+                                                    <i class="fa-solid fa-credit-card"></i> Débito
+                                                </button>
+                                                <button type="button" class="btn-metodo" data-metodo="credito">
+                                                    <i class="fa-solid fa-credit-card"></i> Crédito
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn-success btn-block margin-top-md" id="btn-registrar-pagamento-real">
+                                        <i class="fa-solid fa-receipt"></i> Confirmar Pagamento
+                                    </button>
+                                </div>
+
+                                <div class="comanda-actions-row margin-top-md">
+                                    <button class="btn-danger btn-block" id="btn-solicitar-fechamento">
+                                        <i class="fa-solid fa-lock"></i> Pagar saldo restante para fechar
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -384,6 +417,6 @@
             </div>
         </main>
     </div>
-    <script src="/static/js/app.js?v=1.4"></script>
+    <script src="/static/js/app.js?v=1.5"></script>
 </body>
 </html>

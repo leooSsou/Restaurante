@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let produtosCarregados = [];
     let comandaAtivaCarregada = null;
     let comandasValidadas = [];
+    let metodoPagamentoSelecionado = "pix";
 
     // --- Relógio no Header ---
     function atualizarRelogio() {
@@ -451,32 +452,31 @@ document.addEventListener("DOMContentLoaded", () => {
         statusEl.textContent = c.esta_aberta ? "Aberta" : "Fechada";
         statusEl.className = `badge-status ${c.esta_aberta ? 'open' : 'closed'}`;
 
-        // Para listar os itens, precisamos dos itens carregados. 
-        // A API de comanda ativa já retorna os totais e saldos devedores calculados.
-        // Vamos carregar os dados financeiros na tela:
         document.getElementById("detalhe-valor-total").textContent = `R$ ${c.valor_total.toFixed(2)}`;
         document.getElementById("detalhe-total-pago").textContent = `R$ ${c.total_pago.toFixed(2)}`;
         document.getElementById("detalhe-saldo-devedor").textContent = `R$ ${c.saldo_devedor.toFixed(2)}`;
 
-        // Listar os itens consumidos (como os dados de itens de consumo vêm agregados na comanda,
-        // mas dependemos de ver o que vem da API, vamos fazer uma chamada complementar se necessário).
-        // Na verdade, a nossa API `/comandas/ativas/{numero_cartao}` do controller retorna a comanda completa!
-        // No entanto, para pegar a lista detalhada de itens consumidos com os nomes dos produtos,
-        // fazemos um cruzamento local com os produtos carregados.
+        // Gerenciamento Dinâmico do Caixa de Pagamentos
+        const pagamentoSecao = document.getElementById("caixa-pagamento-secao");
+        const pagamentoValorInput = document.getElementById("pagamento-valor");
+        const btnFechar = document.getElementById("btn-solicitar-fechamento");
+
+        if (c.saldo_devedor > 0) {
+            pagamentoSecao.classList.remove("d-none");
+            pagamentoValorInput.value = c.saldo_devedor.toFixed(2);
+            btnFechar.disabled = true;
+            btnFechar.className = "btn btn-secondary btn-block margin-top-md";
+            btnFechar.innerHTML = `<i class="fa-solid fa-lock"></i> Pague o saldo restante para fechar`;
+        } else {
+            pagamentoSecao.classList.add("d-none");
+            btnFechar.disabled = false;
+            btnFechar.className = "btn btn-success btn-block margin-top-md";
+            btnFechar.innerHTML = `<i class="fa-solid fa-lock-open"></i> Concluir e Fechar Comanda`;
+        }
+
         const itensLista = document.getElementById("detalhe-itens-lista");
         itensLista.innerHTML = "";
 
-        // Para pegar a lista real de itens de consumo, faremos uma requisição completa
-        // ou utilizaremos os itens associados que vêm no banco.
-        // Como o SQLAlchemy retorna o relacionamento `itens` na comanda, e o JSON do comanda_controller
-        // mapeou apenas `total_itens` no POST e não a lista inteira no GET (no GET nós mapeamos valor_total, total_pago e saldo_devedor),
-        // vamos ler os itens que estão salvos.
-        // Se a API não retorna a lista diretamente (retorna apenas valor_total), podemos simular localmente a lista
-        // ou ajustar o endpoint. No entanto, para fins visuais e funcionais imediatos, faremos uma chamada ou mostraremos um resumo.
-        // Vamos expandir o app.js para carregar a lista de consumo buscando diretamente os registros se necessário.
-        // Para simplificar, a tabela de consumo no HTML exibirá o resumo dos itens carregados localmente do banco
-        // caso existam, ou carregando diretamente.
-        // Vamos criar uma lista simples baseada nos itens registrados na comanda:
         if (c.id) {
             buscarEExibirItensConsumo(c.id);
         }
@@ -636,70 +636,61 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- CAIXA: FECHAMENTO DE COMANDA (TAREFA 7 & FASE 3/PAGAMENTOS SIMULADOS) ---
-    const btnSolicitarFechamento = document.getElementById("btn-solicitar-fechamento");
-
-    btnSolicitarFechamento.addEventListener("click", async () => {
-        if (!comandaAtivaCarregada) return;
-
-        // Se o saldo devedor for maior que zero, vamos simular o pagamento para facilitar o teste no front!
-        // Isso ajuda no teste de caixa (Fase 3) até implementarmos os endpoints formais de pagamento.
-        if (comandaAtivaCarregada.saldo_devedor > 0) {
-            const confirmarPagamento = confirm(
-                `A comanda possui um saldo devedor de R$ ${comandaAtivaCarregada.saldo_devedor.toFixed(2)}.\n` +
-                `Deseja simular o recebimento total em PIX para podermos fechá-la?`
-            );
-            
-            if (confirmarPagamento) {
-                // Registrar pagamento fictício diretamente no MySQL para fins de zerar o saldo
-                // Faremos uma chamada de pagamento. Como ainda não criamos a rota de pagamentos formais,
-                // podemos simular criando o modelo de pagamento ou salvando no banco.
-                // Mas pera! Se tentarmos fechar com saldo > 0, o backend vai recusar (exigência da Tarefa 7).
-                // Para zerar o saldo, o backend precisa que exista um registro de pagamento.
-                // Como não temos a rota de pagamento exposta na API ainda, vamos criar um endpoint rápido ou
-                // simular. Espere! No backend, a tabela pagamentos existe e o SQLAlchemy valida.
-                // Se a API de pagamento ainda não está criada, vamos adicionar uma rota de pagamento rápida no comanda_controller?
-                // Isso é extremamente útil! O plano de implementação de bancos de dados definiu a entidade Pagamento,
-                // então criar uma rota POST `/comandas/{comanda_id}/pagamentos` é o caminho perfeito para zerar o saldo!
-                // Vamos implementar uma rota de pagamento rápida ou o usuário não conseguirá testar o fechamento pelo front!
-                // Espera! O comanda_controller não possui rota de pagamento. Vamos adicionar uma no comanda_controller.py?
-                // Sim, para que a simulação de fechamento funcione no front, o caixa precisa conseguir pagar!
-                // Vamos simular o pagamento enviando a requisição para o banco de dados.
-                // Para não quebrar regras fiscais e de aprovação, podemos implementar a rota de pagamento ou realizar o pagamento.
-                // Na verdade, vamos ver: criamos a entidade Pagamento no domínio e no ORM, mas não criamos o controller de pagamento.
-                // Vamos adicionar uma rota rápida para registrar pagamentos na API!
-                // Isso facilitará 100% o fluxo! Vamos ver se podemos adicionar essa rota de pagamento.
-                // Sim! Vou adicionar a rota POST `/comandas/{comanda_id}/pagamentos` no comanda_controller.py
-                // para podermos registrar pagamentos e testar o fechamento real!
-                registrarPagamentoCompleto(comandaAtivaCarregada.id, comandaAtivaCarregada.saldo_devedor);
-                return;
-            } else {
-                return; // Usuário cancelou
-            }
+    // Clique nas Formas de Pagamento
+    document.addEventListener("click", (e) => {
+        const btnMetodo = e.target.closest(".btn-metodo");
+        if (btnMetodo) {
+            document.querySelectorAll(".btn-metodo").forEach(b => b.classList.remove("active"));
+            btnMetodo.classList.add("active");
+            metodoPagamentoSelecionado = btnMetodo.getAttribute("data-metodo");
         }
-
-        // Se saldo já for 0, chama o fechamento direto
-        executarFechamentoComanda(comandaAtivaCarregada.id);
     });
 
-    async function registrarPagamentoCompleto(comandaId, valor) {
+    // Evento de Confirmação do Pagamento no Formulário do Caixa
+    const btnRegistrarPg = document.getElementById("btn-registrar-pagamento-real");
+    if (btnRegistrarPg) {
+        btnRegistrarPg.addEventListener("click", async () => {
+            if (!comandaAtivaCarregada) return;
+            const valor = parseFloat(document.getElementById("pagamento-valor").value) || 0;
+            if (valor <= 0) {
+                alert("Por favor, digite um valor de pagamento maior que zero.");
+                return;
+            }
+            await registrarPagamentoCompleto(comandaAtivaCarregada.id, valor, metodoPagamentoSelecionado);
+        });
+    }
+
+    // Clique no Fechamento Final da Comanda (Liberar cartão)
+    const btnSolicitarFechamento = document.getElementById("btn-solicitar-fechamento");
+    if (btnSolicitarFechamento) {
+        btnSolicitarFechamento.addEventListener("click", async () => {
+            if (!comandaAtivaCarregada) return;
+
+            if (comandaAtivaCarregada.saldo_devedor > 0) {
+                alert("Não é possível fechar comanda com saldo pendente!");
+                return;
+            }
+
+            await executarFechamentoComanda(comandaAtivaCarregada.id);
+        });
+    }
+
+    // Função que registra o pagamento no Backend
+    async function registrarPagamentoCompleto(comandaId, valor, metodo) {
         try {
-            // Nota: Para registrar o pagamento, chamaremos um endpoint HTTP.
-            // Para garantir que o endpoint exista, vou criá-lo no backend (comanda_controller.py).
-            // A rota será POST `/comandas/{comanda_id}/pagamentos` enviando `{ valor, metodo_pagamento }`.
             const res = await fetch(`/comandas/${comandaId}/pagamentos`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     valor: valor,
-                    metodo_pagamento: "pix"
+                    metodo_pagamento: metodo
                 })
             });
 
             const data = await res.json();
             if (res.ok) {
-                alert(`Pagamento de R$ ${valor.toFixed(2)} registrado com sucesso via PIX!`);
-                // Recarrega dados financeiros
+                alert(`Recebimento de R$ ${valor.toFixed(2)} registrado com sucesso (${metodo.toUpperCase()})!`);
+                // Recarrega dados financeiros e atualiza painéis
                 const resAtualizado = await resAtivaComanda(comandaAtivaCarregada.numero_cartao);
                 comandaAtivaCarregada = resAtualizado;
                 exibirDetalhesComanda(resAtualizado);
