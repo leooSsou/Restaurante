@@ -445,10 +445,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Tornar função disponível globalmente para o botão "Atender" da tabela
     window.carregarComandaNoCaixa = function(numeroCartao) {
-        opNumeroCartao.value = numeroCartao;
-        btnConsultar.dispatchEvent(new Event("click"));
-        // Muda para a aba de balança
-        document.getElementById("nav-balanca").dispatchEvent(new Event("click"));
+        const inputBusca = document.getElementById("op-numero-cartao");
+        const botaoConsultar = document.getElementById("btn-consultar-comanda");
+        const navBalanca = document.getElementById("nav-balanca");
+
+        if (inputBusca) {
+            inputBusca.value = numeroCartao;
+        }
+        if (navBalanca) {
+            navBalanca.click();
+        }
+        if (botaoConsultar) {
+            botaoConsultar.click();
+        }
     };
 
     btnConsultar.addEventListener("click", async () => {
@@ -757,6 +766,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 opNumeroCartao.value = "";
                 comandaDetalhesContainer.classList.add("d-none");
                 atualizarPainelGeral();
+
+                // Redireciona de volta para a tela de comandas ativas após 1.5s
+                const navComandas = document.getElementById("nav-comandas");
+                if (navComandas) {
+                    setTimeout(() => navComandas.click(), 1500);
+                }
             } else {
                 throw new Error(data.detail || "Erro ao fechar comanda.");
             }
